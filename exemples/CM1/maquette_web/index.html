@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ecureuil — maquette</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <p class="bandeau-maquette">
+      Maquette d'interface : donnees factices, aucun serveur, aucun fichier reellement lu.
+    </p>
+
+    <header class="entete">
+      <div class="marque">
+        <span class="logo" aria-hidden="true">E</span>
+        <div>
+          <strong>Ecureuil</strong>
+          <span class="marque-sous-titre">budget partage entre amis</span>
+        </div>
+      </div>
+
+      <div class="entete-actions">
+        <label class="champ-en-ligne">
+          <span>Connecte comme</span>
+          <select id="choix-utilisateur"></select>
+        </label>
+        <button id="bascule-theme" class="bouton-fantome" type="button">Theme sombre</button>
+      </div>
+    </header>
+
+    <nav class="onglets" role="tablist" aria-label="Sections">
+      <button class="onglet actif" role="tab" data-vue="tableau-de-bord">Tableau de bord</button>
+      <button class="onglet" role="tab" data-vue="releves">Mes releves</button>
+      <button class="onglet" role="tab" data-vue="amis">Mes amis</button>
+    </nav>
+
+    <main>
+      <!-- ============================ TABLEAU DE BORD ======================= -->
+      <section id="vue-tableau-de-bord" class="vue">
+        <div class="barre-filtres">
+          <span class="etiquette-filtre">Periode</span>
+          <div class="segments" id="filtre-periode">
+            <button type="button" class="segment" data-mois="6">6 derniers mois</button>
+            <button type="button" class="segment actif" data-mois="12">12 derniers mois</button>
+          </div>
+        </div>
+
+        <section class="carte carte-resume">
+          <p class="etiquette">Solde de mai 2026</p>
+          <p class="chiffre-vedette" id="solde-du-mois">—</p>
+          <p class="delta" id="solde-delta">—</p>
+        </section>
+
+        <div class="grille-tuiles" id="tuiles-cles"></div>
+
+        <article class="carte graphique">
+          <header class="carte-entete">
+            <div>
+              <h2>Revenus et depenses</h2>
+              <p class="sous-titre" id="sous-titre-evolution">mois par mois</p>
+            </div>
+            <button class="bouton-fantome" type="button" data-bascule="evolution">
+              Voir le tableau
+            </button>
+          </header>
+          <div class="legende" id="legende-evolution"></div>
+          <div class="zone-graphique" id="graphique-evolution"></div>
+          <div class="zone-tableau" id="tableau-evolution" hidden></div>
+        </article>
+
+        <article class="carte graphique">
+          <header class="carte-entete">
+            <div>
+              <h2>Depenses par categorie</h2>
+              <p class="sous-titre">mai 2026</p>
+            </div>
+            <button class="bouton-fantome" type="button" data-bascule="categories">
+              Voir le tableau
+            </button>
+          </header>
+          <div class="zone-graphique" id="graphique-categories"></div>
+          <div class="zone-tableau" id="tableau-categories" hidden></div>
+        </article>
+      </section>
+
+      <!-- ============================== RELEVES ============================= -->
+      <section id="vue-releves" class="vue" hidden>
+        <article class="carte zone-depot" id="zone-depot">
+          <p class="depot-titre">Importer un releve</p>
+          <p class="depot-aide">
+            Glissez un fichier <code>.xlsx</code> ici, ou choisissez-le sur votre ordinateur.
+          </p>
+          <button class="bouton" type="button" id="bouton-import">Choisir un fichier</button>
+          <p class="depot-note">
+            Formats acceptes : export Excel de votre banque (Date, Libelle, Categorie, Montant).
+          </p>
+        </article>
+
+        <article class="carte">
+          <header class="carte-entete">
+            <div>
+              <h2>Releves importes</h2>
+              <p class="sous-titre" id="sous-titre-releves">—</p>
+            </div>
+          </header>
+          <div class="tableau-defilant">
+            <table class="tableau" id="tableau-releves">
+              <thead>
+                <tr>
+                  <th scope="col">Fichier</th>
+                  <th scope="col">Periode</th>
+                  <th scope="col" class="nombre">Operations</th>
+                  <th scope="col" class="nombre">Revenus</th>
+                  <th scope="col" class="nombre">Depenses</th>
+                  <th scope="col" class="nombre">Solde</th>
+                  <th scope="col">Statut</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- =============================== AMIS =============================== -->
+      <section id="vue-amis" class="vue" hidden>
+        <article class="carte">
+          <header class="carte-entete">
+            <div>
+              <h2>Ce mois-ci</h2>
+              <p class="sous-titre">depenses par rapport a l'objectif de chacun</p>
+            </div>
+          </header>
+          <ul class="liste-amis" id="liste-amis"></ul>
+          <p class="note-confidentialite">
+            Vos amis voient vos totaux et vos categories, jamais le detail de vos operations.
+          </p>
+        </article>
+
+        <article class="carte graphique">
+          <header class="carte-entete">
+            <div>
+              <h2>Depenses mensuelles</h2>
+              <p class="sous-titre">moi, mes amis, et la moyenne du groupe</p>
+            </div>
+            <button class="bouton-fantome" type="button" data-bascule="amis">
+              Voir le tableau
+            </button>
+          </header>
+          <div class="legende" id="legende-amis"></div>
+          <div class="zone-graphique" id="graphique-amis"></div>
+          <div class="zone-tableau" id="tableau-amis" hidden></div>
+        </article>
+
+        <article class="carte graphique">
+          <header class="carte-entete">
+            <div>
+              <h2>Par categorie</h2>
+              <p class="sous-titre">mai 2026 — moi et la moyenne du groupe</p>
+            </div>
+            <button class="bouton-fantome" type="button" data-bascule="comparaison">
+              Voir le tableau
+            </button>
+          </header>
+          <div class="legende" id="legende-comparaison"></div>
+          <div class="zone-graphique" id="graphique-comparaison"></div>
+          <div class="zone-tableau" id="tableau-comparaison" hidden></div>
+        </article>
+
+        <article class="carte carte-invitation">
+          <h2>Inviter un ami</h2>
+          <p class="sous-titre">Il recevra un lien ; vous devrez tous les deux accepter.</p>
+          <form class="formulaire-invitation" id="formulaire-invitation">
+            <input type="email" placeholder="adresse@exemple.fr" aria-label="Adresse e-mail" />
+            <button class="bouton" type="submit">Envoyer</button>
+          </form>
+        </article>
+      </section>
+    </main>
+
+    <footer class="pied">
+      Maquette realisee en HTML, CSS et JavaScript, sans aucune bibliotheque externe.
+    </footer>
+
+    <div id="infobulle" role="status" hidden></div>
+    <div id="message-flash" role="status" hidden></div>
+
+    <script src="donnees.js"></script>
+    <script src="graphiques.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

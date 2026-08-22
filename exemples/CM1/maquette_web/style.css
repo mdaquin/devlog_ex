@@ -1,0 +1,637 @@
+/* Feuille de style de la maquette.
+ *
+ * Toutes les couleurs sont declarees une seule fois, sous forme de variables
+ * CSS : le mode sombre se contente de redefinir ces memes variables. Les
+ * graphiques les lisent aussi (voir graphiques.js), donc rien n'est ecrit
+ * en dur deux fois.
+ */
+
+/* ------------------------------ Couleurs ------------------------------ */
+
+:root {
+  color-scheme: light;
+
+  --plan: #f9f9f7;
+  --surface-graphique: #fcfcfb;
+  --encre-primaire: #0b0b0b;
+  --encre-secondaire: #52514e;
+  --encre-discrete: #898781;
+  --grille: #e1e0d9;
+  --axe: #c3c2b7;
+  --bordure: rgba(11, 11, 11, 0.1);
+  --survol: rgba(11, 11, 11, 0.04);
+
+  /* Palette categorielle : l'ordre des emplacements ne change jamais, et
+     chaque personne garde sa couleur d'un graphique a l'autre. */
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --serie-3: #1baf7a;
+  --contexte: #898781;
+
+  /* Couleurs d'etat, jamais utilisees comme couleurs de series. */
+  --bon: #0ca30c;
+  --attention: #fab219;
+  --critique: #d03b3b;
+  --texte-succes: #006300;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="clair"]) {
+    color-scheme: dark;
+
+    --plan: #0d0d0d;
+    --surface-graphique: #1a1a19;
+    --encre-primaire: #ffffff;
+    --encre-secondaire: #c3c2b7;
+    --encre-discrete: #898781;
+    --grille: #2c2c2a;
+    --axe: #383835;
+    --bordure: rgba(255, 255, 255, 0.1);
+    --survol: rgba(255, 255, 255, 0.06);
+
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
+    --serie-3: #199e70;
+    --texte-succes: #0ca30c;
+  }
+}
+
+:root[data-theme="sombre"] {
+  color-scheme: dark;
+
+  --plan: #0d0d0d;
+  --surface-graphique: #1a1a19;
+  --encre-primaire: #ffffff;
+  --encre-secondaire: #c3c2b7;
+  --encre-discrete: #898781;
+  --grille: #2c2c2a;
+  --axe: #383835;
+  --bordure: rgba(255, 255, 255, 0.1);
+  --survol: rgba(255, 255, 255, 0.06);
+
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
+  --serie-3: #199e70;
+  --texte-succes: #0ca30c;
+}
+
+/* ------------------------------- Bases -------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+/* `hidden` doit gagner contre les mises en page en grille ou en flex,
+   sans quoi les vues masquees resteraient visibles. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--plan);
+  color: var(--encre-primaire);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Les colonnes de chiffres s'alignent ; les grands nombres isoles gardent
+   les chasses proportionnelles (plus lisibles en gros). */
+.chiffres,
+.tableau td.nombre,
+.tableau th.nombre {
+  font-variant-numeric: tabular-nums;
+}
+
+.bandeau-maquette {
+  margin: 0;
+  padding: 8px 24px;
+  background: var(--surface-graphique);
+  border-bottom: 1px solid var(--bordure);
+  color: var(--encre-secondaire);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ------------------------------- Entete ------------------------------- */
+
+.entete {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+}
+
+.marque {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--serie-1);
+  color: #fff;
+  font-weight: 600;
+}
+
+.marque strong {
+  display: block;
+  font-size: 17px;
+}
+
+.marque-sous-titre {
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+.entete-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.champ-en-ligne {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+select,
+input[type="email"] {
+  padding: 7px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  background: var(--surface-graphique);
+  color: var(--encre-primaire);
+  font: inherit;
+  font-size: 14px;
+}
+
+/* ------------------------------ Boutons ------------------------------- */
+
+.bouton,
+.bouton-fantome {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.bouton {
+  border: none;
+  background: var(--serie-1);
+  color: #fff;
+}
+
+.bouton-fantome {
+  border: 1px solid var(--bordure);
+  background: transparent;
+  color: var(--encre-secondaire);
+}
+
+.bouton-fantome:hover {
+  background: var(--survol);
+}
+
+/* ------------------------------ Onglets ------------------------------- */
+
+.onglets {
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.onglet {
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--encre-secondaire);
+  font: inherit;
+  cursor: pointer;
+}
+
+.onglet.actif {
+  border-bottom-color: var(--serie-1);
+  color: var(--encre-primaire);
+  font-weight: 600;
+}
+
+/* ------------------------------- Vues --------------------------------- */
+
+main {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.vue {
+  display: grid;
+  gap: 20px;
+}
+
+.carte {
+  padding: 20px;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  background: var(--surface-graphique);
+}
+
+.carte-entete {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sous-titre {
+  margin: 2px 0 0;
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+/* Une seule barre de filtres, au-dessus de tous les graphiques qu'elle
+   concerne (jamais un filtre par carte). */
+.barre-filtres {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.etiquette-filtre {
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+.segments {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+}
+
+.segment {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--encre-secondaire);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.segment.actif {
+  background: var(--survol);
+  color: var(--encre-primaire);
+  font-weight: 600;
+}
+
+/* --------------------- Chiffre vedette et tuiles ---------------------- */
+
+.carte-resume {
+  display: grid;
+  gap: 2px;
+}
+
+.etiquette {
+  margin: 0;
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+.chiffre-vedette {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.delta {
+  margin: 0;
+  color: var(--encre-secondaire);
+  font-size: 14px;
+}
+
+.delta .hausse {
+  color: var(--texte-succes);
+}
+
+.delta .baisse {
+  color: var(--critique);
+}
+
+.grille-tuiles {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.tuile {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  background: var(--surface-graphique);
+}
+
+.tuile-valeur {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.tuile .miniature {
+  margin-top: 4px;
+}
+
+.tuile .miniature svg {
+  display: block;
+  width: 120px;
+  height: 32px;
+}
+
+/* ----------------------------- Graphiques ----------------------------- */
+
+.zone-graphique svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.zone-graphique .barre {
+  cursor: crosshair;
+}
+
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+.puce {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+
+#infobulle {
+  position: fixed;
+  z-index: 20;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  background: var(--surface-graphique);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  color: var(--encre-primaire);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ------------------------------ Tableaux ------------------------------ */
+
+.tableau-defilant {
+  overflow-x: auto;
+}
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tableau th,
+.tableau td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--bordure);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableau th {
+  color: var(--encre-secondaire);
+  font-weight: 500;
+}
+
+.tableau .nombre {
+  text-align: right;
+}
+
+.tableau tbody tr:hover {
+  background: var(--survol);
+}
+
+/* ------------------------- Import de releves -------------------------- */
+
+.zone-depot {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 2px dashed var(--axe);
+  text-align: center;
+}
+
+.zone-depot.survol {
+  border-color: var(--serie-1);
+  background: var(--survol);
+}
+
+.depot-titre {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.depot-aide,
+.depot-note {
+  margin: 0;
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--survol);
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--survol);
+  color: var(--encre-secondaire);
+  font-size: 12px;
+}
+
+/* La pastille de couleur ne suffit jamais : le texte du badge dit la meme
+   chose, pour qui ne distingue pas les couleurs. */
+.badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bon);
+}
+
+.badge.en-cours::before {
+  background: var(--attention);
+}
+
+/* --------------------------- Amis et jauges --------------------------- */
+
+.liste-amis {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ami {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--survol);
+  color: var(--encre-secondaire);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ami-nom {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.ami-nom span:last-child {
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+/* Jauge : la partie remplie porte l'etat, le fond est un ton plus clair de
+   la meme couleur, pour que l'etat se lise sur toute la longueur. */
+.jauge {
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--survol);
+  overflow: hidden;
+}
+
+.jauge > div {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--bon);
+}
+
+.jauge.attention > div {
+  background: var(--attention);
+}
+
+.jauge.depasse > div {
+  background: var(--critique);
+}
+
+.ami-etat {
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.note-confidentialite {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--bordure);
+  color: var(--encre-secondaire);
+  font-size: 13px;
+}
+
+.formulaire-invitation {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.formulaire-invitation input {
+  flex: 1;
+  max-width: 320px;
+}
+
+/* ------------------------------- Divers ------------------------------- */
+
+.pied {
+  padding: 24px;
+  color: var(--encre-discrete);
+  font-size: 13px;
+  text-align: center;
+}
+
+#message-flash {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 30;
+  padding: 12px 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  background: var(--surface-graphique);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .chiffre-vedette {
+    font-size: 40px;
+  }
+
+  .entete,
+  .onglets,
+  main {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

@@ -1,0 +1,13 @@
+nom,prenom,age,sexe,email,heures_sommeil,reveils,who5_1,who5_2,who5_4,fatigue_diurne,cafe_soir,commentaire
+Rousseau,Camille,34,Femme,camille.rousseau@example.com,7.5,1,La plupart du temps,La plupart du temps,Plus de la moitié du temps,Rarement,Jamais,
+Mercier,Julien,41,Homme,j.mercier@example.com,6.0,2,Plus de la moitié du temps,Moins de la moitié du temps,Moins de la moitié du temps,Souvent,3 à 5 fois par semaine,"Période très chargée au travail, je dors mal depuis deux mois."
+Bonnet,Amélie,27,Femme,amelie.bonnet@example.org,8.0,0,Tout le temps,La plupart du temps,La plupart du temps,Jamais,Jamais,
+Da Silva,Rui,52,Homme,rui.dasilva@example.com,5.5,3,De temps en temps,De temps en temps,Jamais,Tous les jours,Tous les jours,"Je me réveille presque toutes les nuits vers 4h, impossible de me rendormir."
+Lefèvre,Marion,23,Femme,marion.lefevre@example.org,9.0,1,La plupart du temps,Plus de la moitié du temps,La plupart du temps,Rarement,1 à 2 fois par semaine,
+Nguyen,Thi Lan,38,Femme,tl.nguyen@example.com,6.5,2,Moins de la moitié du temps,Moins de la moitié du temps,De temps en temps,Souvent,1 à 2 fois par semaine,"Deux enfants en bas âge, nuits hachées."
+Garnier,Paul,66,Homme,paul.garnier@example.org,7.0,2,Plus de la moitié du temps,La plupart du temps,Plus de la moitié du temps,Rarement,Jamais,
+Chevalier,Sofia,45,Ne souhaite pas répondre,s.chevalier@example.com,6.0,1,Moins de la moitié du temps,Plus de la moitié du temps,Moins de la moitié du temps,Souvent,3 à 5 fois par semaine,
+Perrot,Hugo,19,Homme,hugo.perrot@example.org,7.0,0,La plupart du temps,Plus de la moitié du temps,Plus de la moitié du temps,Rarement,Tous les jours,"Je bois du café tard le soir et je dors très bien, ça ne me gêne pas."
+Faure,Inès,31,Femme,ines.faure@example.com,4.5,4,Jamais,De temps en temps,Jamais,Tous les jours,Tous les jours,Insomnies depuis le printemps.
+Marchand,Théo,29,Autre,theo.marchand@example.org,8.5,1,Plus de la moitié du temps,La plupart du temps,La plupart du temps,Jamais,1 à 2 fois par semaine,
+Ollivier,Anne,57,Femme,anne.ollivier@example.com,7.0,3,Moins de la moitié du temps,Moins de la moitié du temps,Moins de la moitié du temps,Souvent,Jamais,"Réveils fréquents, mais je me rendors assez vite."

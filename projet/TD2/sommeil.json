@@ -1,0 +1,69 @@
+{
+  "titre": "Sommeil et bien-être — questionnaire court",
+  "version": "1.0",
+  "questions": {
+     "heures_sommeil": {
+      "libellé": "En moyenne, combien d'heures dormez-vous par nuit ?",
+      "type": "numerique",
+      "intervalle": [0, 14],
+      "pondération": 0.0
+    },
+    "reveils": {
+      "libellé": "Combien de fois vous réveillez-vous par nuit, en moyenne ?",
+      "type": "numerique",
+      "intervalle": [0, 10],
+      "pondération": 0.0
+    },
+    "who5_1": {
+      "libellé": "Ces deux dernières semaines, je me suis senti(e) de bonne humeur.",
+      "type": "choix_multiple",
+      "réponses_possibles": {
+        "Jamais": 0.0,
+        "De temps en temps": 1.0,
+        "Moins de la moitié du temps": 2.0,
+        "Plus de la moitié du temps": 3.0,
+        "La plupart du temps": 4.0,
+        "Tout le temps": 5.0
+      },
+      "pondération": 1.0
+    },
+    "who5_2": {
+      "libellé": "Ces deux dernières semaines, je me suis senti(e) calme et détendu(e).",
+      "type": "choix_multiple",
+      "réponses_possibles": {
+        "Jamais": 0.0, "De temps en temps": 1.0,
+        "Moins de la moitié du temps": 2.0, "Plus de la moitié du temps": 3.0,
+        "La plupart du temps": 4.0, "Tout le temps": 5.0
+      },
+      "pondération": 1.0
+    },
+    "who5_4": {
+      "libellé": "Ces deux dernières semaines, je me suis réveillé(e) en me sentant frais(che) et reposé(e).",
+      "type": "choix_multiple",
+      "réponses_possibles": {
+        "Jamais": 0.0, "De temps en temps": 1.0,
+        "Moins de la moitié du temps": 2.0, "Plus de la moitié du temps": 3.0,
+        "La plupart du temps": 4.0, "Tout le temps": 5.0
+      },
+      "pondération": 1.0
+    },
+    "fatigue_diurne": {
+      "libellé": "Vous arrive-t-il de somnoler dans la journée ?",
+      "type": "choix_multiple",
+      "réponses_possibles": {
+        "Jamais": 3.0, "Rarement": 2.0, "Souvent": 1.0, "Tous les jours": 0.0
+      },
+      "pondération": 1.0,
+      "inversé": true
+    },
+    "cafe_soir": {
+      "libellé": "À quelle fréquence buvez-vous du café après 17h ?",
+      "type": "choix_multiple",
+      "réponses_possibles": {
+        "Jamais": 0.0, "1 à 2 fois par semaine": 1.0,
+        "3 à 5 fois par semaine": 2.0, "Tous les jours": 3.0
+      },
+      "pondération": 0.0
+    }
+  }
+}

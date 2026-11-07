@@ -39,7 +39,7 @@ def afficher(lignes, iban, periode_debut):
 
 if __name__ == "__main__":
     if not BASE.exists():
-        sys.exit(f"Base introuvable : {BASE} (lancez d'abord creer_base.py)")
+        sys.exit(f"Base introuvable : {BASE} (lancez d'abord create_db.py)")
     connexion = sqlite3.connect(BASE)
     iban, debut = "FR7630001007941234567890185", "2026-01-01"
     afficher(recapitulatif(connexion, iban, debut), iban, debut)

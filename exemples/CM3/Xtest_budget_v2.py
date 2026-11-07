@@ -25,3 +25,7 @@ class TestTotalDepenses_v2(unittest.TestCase):
 
     def test_la_fixture_est_neuve_a_chaque_fois(self):
         self.assertEqual(len(self.janvier), 3)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Crée une base SQLite à partir de schema.sql et donnees.sql, puis affiche un rapport."""
+"""Crée une base SQLite à partir de schema_sqlite.sql et donnees.sql, puis affiche un rapport."""
 
 import sqlite3
 import sys

@@ -1,0 +1,36 @@
+{
+  "client-123": {
+    "id": "client-123",
+    "profil": "famille",
+    "civilite": "Mme",
+    "genre": "femme",
+    "prenom": "Mélanie",
+    "nom": "Thomas",
+    "date_naissance": "1979-05-20",
+    "adresse": "79 boulevard Gambetta",
+    "code_postal": "69003",
+    "ville": "Lyon",
+    "email": "melanie.thomas@example.fr",
+    "telephone": "06 46 90 14 13",
+    "situation": "pacsé(e)",
+    "enfants": 2,
+    "emploi": "Artisan",
+    "employeur": "CONSEIL AZUR",
+    "revenu_mensuel": 3648.92,
+    "type_compte": "Compte joint",
+    "logement": {
+      "statut": "proprietaire",
+      "montant_mensuel": 864.63,
+      "libelle": "ECHEANCE PRET IMMOBILIER",
+      "taxe_fonciere": 856.49
+    },
+    "banque": {
+      "nom": "Boursorama Banque",
+      "bic": "BOUSFRPP",
+      "adresse": "44 rue Traversière, 92100 Boulogne-Billancourt",
+      "iban": "FR7640618440561721062011704"
+    },
+    "solde_initial": 2526.57,
+    "date_creation": "2026-11-07"
+  }
+}

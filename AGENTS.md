@@ -37,6 +37,6 @@ Only change these when the task explicitly asks, and expect/report intentional f
 
 - Run scripts from their own directory: modules import siblings directly (`from budget import ...`) and use cwd-relative paths.
 - French keys/identifiers are load-bearing (e.g. JSON `pondération`, `réponses_possibles`, `libellé`); don't transliterate.
-- Root `.gitignore` only covers `/.venv` and `/.DS_Store`; some `.venv`, `__pycache__/*.pyc` and `.DS_Store` files are already tracked. Don't mass-delete tracked files.
-- `exemples/CM1/avec_base_de_données/.venv` is Python 3.10; root `.venv` and system Python are 3.12.
+- Root `.gitignore` ignores `.venv/`, `.DS_Store`, `*.pyc` and `__pycache__/` recursively.
+- `exemples/CM1/avec_base_de_données/.venv` is Python 3.10; root `.venv` and system Python are 3.12. Local virtual environments are ignored by git.
 - `projet/TD*/retours.md` state the course rules: specify before generating, verify AI output, and keep AI traces (tool, model, effort). Follow them if asked to produce student work.

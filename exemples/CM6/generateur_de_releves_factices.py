@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Genere un jeu de releves bancaires francais synthetiques mais realistes.
 
-Usage :
+Usage : ceci est une modification
     python generateur_de_releves_factices.py <compte> <debut> <fin> <frequence>
     python generateur_de_releves_factices.py client-001 2026-01-01 2026-06-30 1mo
 

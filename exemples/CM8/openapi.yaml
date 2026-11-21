@@ -1,0 +1,1060 @@
+openapi: 3.1.0
+
+info:
+  title: API de gestion de dépenses
+  version: 0.1.0
+  description: |
+    API REST d'une application web de gestion de dépenses.
+
+    Concepts principaux :
+    - **Compte** : compte bancaire appartenant à un utilisateur (propriétaire).
+    - **Accès** : droit donné par le propriétaire à un autre utilisateur sur un compte (`READ` ou `WRITE`).
+    - **Extrait de compte** (*statement*) : fichier CSV ou Excel importé pour un compte ; il produit des transactions.
+    - **Transaction** : opération sur un compte. Montant négatif = dépense, positif = revenu.
+    - **Catégorie** : libellé permettant de classer les transactions.
+
+    Droits :
+    | Action | READ | WRITE | OWNER |
+    |---|---|---|---|
+    | Consulter compte, transactions, extraits, états | oui | oui | oui |
+    | Importer / supprimer un extrait, catégoriser une transaction | non | oui | oui |
+    | Gérer les accès, supprimer le compte | non | non | oui |
+
+    Authentification : l'utilisateur obtient un jeton d'accès (JWT, courte durée) et un jeton de
+    rafraîchissement via `POST /auth/token`, puis envoie le jeton d'accès dans l'en-tête
+    `Authorization: Bearer <jeton>`. Le jeton d'accès expiré se renouvelle via `POST /auth/refresh`.
+    Un utilisateur s'enregistre au préalable via `POST /users`.
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: http://localhost:8080/v1
+    description: Développement local
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Utilisateurs
+  - name: Authentification
+  - name: Comptes
+  - name: Extraits de compte
+  - name: Transactions
+  - name: États
+  - name: Catégories
+  - name: Accès
+
+paths:
+  /users:
+    post:
+      tags: [Utilisateurs]
+      operationId: registerUser
+      summary: Enregistrer un nouvel utilisateur
+      description: |
+        Crée un compte utilisateur. Ne nécessite pas d'authentification.
+        L'utilisateur peut ensuite obtenir un jeton via `POST /auth/token`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Utilisateur créé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409':
+          description: Un utilisateur avec cette adresse e-mail existe déjà.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Trop de requêtes, réessayer plus tard.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /auth/token:
+    post:
+      tags: [Authentification]
+      operationId: createToken
+      summary: Obtenir un jeton d'accès
+      description: Authentifie l'utilisateur par e-mail et mot de passe.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Jetons émis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Identifiants incorrects.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Trop de tentatives, réessayer plus tard.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /auth/refresh:
+    post:
+      tags: [Authentification]
+      operationId: refreshToken
+      summary: Renouveler le jeton d'accès
+      description: |
+        Échange un jeton de rafraîchissement valide contre un nouveau jeton d'accès
+        (et un nouveau jeton de rafraîchissement : le précédent est alors invalidé).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Nouveaux jetons.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Jeton de rafraîchissement invalide ou expiré.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /accounts:
+    get:
+      tags: [Comptes]
+      operationId: listAccounts
+      summary: Lister les comptes accessibles
+      description: Retourne les comptes dont l'utilisateur est propriétaire ou auxquels un accès lui a été donné.
+      responses:
+        '200':
+          description: Liste des comptes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Comptes]
+      operationId: createAccount
+      summary: Créer un compte
+      description: Crée un compte dont l'utilisateur courant devient propriétaire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreate'
+      responses:
+        '201':
+          description: Compte créé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /accounts/{accountId}:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      tags: [Comptes]
+      operationId: getAccount
+      summary: Consulter un compte
+      responses:
+        '200':
+          description: Détail du compte.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Comptes]
+      operationId: deleteAccount
+      summary: Supprimer un compte
+      description: |
+        Réservé au propriétaire. Supprime en cascade les extraits, les transactions et les accès du compte.
+      responses:
+        '204':
+          description: Compte supprimé.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/summary:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      tags: [États]
+      operationId: getAccountSummary
+      summary: État des dépenses et des revenus
+      description: |
+        Retourne le total des dépenses et des revenus d'un compte sur une période.
+        Avec le paramètre `categoryId`, l'état est restreint à une catégorie donnée
+        (dépenses ou revenus d'une catégorie sur une période). Avec `groupBy`, le détail est ventilé.
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - name: categoryId
+          in: query
+          description: Restreint l'état à cette catégorie.
+          schema:
+            type: string
+            format: uuid
+        - name: groupBy
+          in: query
+          description: Ventilation du détail.
+          schema:
+            type: string
+            enum: [none, category, month]
+            default: none
+      responses:
+        '200':
+          description: État de la période.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSummary'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/statements:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      tags: [Extraits de compte]
+      operationId: listStatements
+      summary: Lister les extraits de compte d'un compte
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Liste paginée des extraits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatementPage'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Extraits de compte]
+      operationId: uploadStatement
+      summary: Importer un extrait de compte
+      description: |
+        Importe un fichier CSV ou Excel (`.csv`, `.xlsx`) et crée les transactions correspondantes.
+        Nécessite le droit `WRITE`. Les transactions déjà présentes sont ignorées (voir `duplicatesSkipped`).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Fichier CSV ou Excel.
+      responses:
+        '201':
+          description: Extrait importé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statement'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413':
+          description: Fichier trop volumineux.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '415':
+          description: Format de fichier non supporté.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Fichier lisible mais contenu invalide (colonnes manquantes, dates illisibles, etc.).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /accounts/{accountId}/statements/{statementId}:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/StatementId'
+    get:
+      tags: [Extraits de compte]
+      operationId: getStatement
+      summary: Consulter un extrait de compte
+      responses:
+        '200':
+          description: Détail de l'extrait.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statement'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Extraits de compte]
+      operationId: deleteStatement
+      summary: Supprimer un extrait de compte
+      description: Nécessite le droit `WRITE`. Supprime aussi les transactions issues de cet extrait.
+      responses:
+        '204':
+          description: Extrait supprimé.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/transactions:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      tags: [Transactions]
+      operationId: listTransactions
+      summary: Lister les transactions d'un compte
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - name: categoryId
+          in: query
+          description: Filtre sur une catégorie.
+          schema:
+            type: string
+            format: uuid
+        - name: uncategorized
+          in: query
+          description: Si `true`, ne retourne que les transactions sans catégorie.
+          schema:
+            type: boolean
+        - name: statementId
+          in: query
+          description: Filtre sur un extrait de compte.
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          description: Filtre sur dépenses ou revenus.
+          schema:
+            type: string
+            enum: [expense, income]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Liste paginée des transactions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPage'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/transactions/{transactionId}:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/TransactionId'
+    get:
+      tags: [Transactions]
+      operationId: getTransaction
+      summary: Consulter une transaction
+      responses:
+        '200':
+          description: Détail de la transaction (catégorie incluse).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/transactions/{transactionId}/category:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/TransactionId'
+    get:
+      tags: [Transactions]
+      operationId: getTransactionCategory
+      summary: Obtenir la catégorie d'une transaction
+      responses:
+        '200':
+          description: Catégorie de la transaction.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Compte ou transaction introuvable, ou transaction sans catégorie.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    put:
+      tags: [Transactions]
+      operationId: setTransactionCategory
+      summary: Affecter une catégorie à une transaction
+      description: Nécessite le droit `WRITE`. Remplace la catégorie actuelle.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [categoryId]
+              properties:
+                categoryId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Transaction mise à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Transactions]
+      operationId: clearTransactionCategory
+      summary: Retirer la catégorie d'une transaction
+      description: Nécessite le droit `WRITE`.
+      responses:
+        '204':
+          description: Catégorie retirée.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /categories:
+    get:
+      tags: [Catégories]
+      operationId: listCategories
+      summary: Lister les catégories
+      responses:
+        '200':
+          description: Liste des catégories de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Catégories]
+      operationId: createCategory
+      summary: Créer une catégorie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '201':
+          description: Catégorie créée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409':
+          description: Une catégorie avec ce libellé existe déjà.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /categories/{categoryId}:
+    parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Catégories]
+      operationId: updateCategory
+      summary: Modifier une catégorie
+      description: Renomme la catégorie. Les transactions qui la portent conservent l'association.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '200':
+          description: Catégorie mise à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Une catégorie avec ce libellé existe déjà.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    delete:
+      tags: [Catégories]
+      operationId: deleteCategory
+      summary: Supprimer une catégorie
+      description: Les transactions qui portaient cette catégorie deviennent non catégorisées.
+      responses:
+        '204':
+          description: Catégorie supprimée.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/access:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      tags: [Accès]
+      operationId: listAccountAccess
+      summary: Lister les accès donnés sur un compte
+      description: Réservé au propriétaire.
+      responses:
+        '200':
+          description: Liste des accès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountAccess'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Accès]
+      operationId: grantAccountAccess
+      summary: Donner accès à un compte à un autre utilisateur
+      description: |
+        Réservé au propriétaire. Si l'utilisateur a déjà un accès, celui-ci est remplacé
+        (ce qui permet de passer de `READ` à `WRITE` et inversement).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAccessCreate'
+      responses:
+        '201':
+          description: Accès créé ou mis à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountAccess'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /accounts/{accountId}/access/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: userId
+        in: path
+        required: true
+        description: Identifiant de l'utilisateur dont l'accès est concerné.
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [Accès]
+      operationId: revokeAccountAccess
+      summary: Retirer l'accès d'un utilisateur à un compte
+      description: Réservé au propriétaire.
+      responses:
+        '204':
+          description: Accès retiré.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    StatementId:
+      name: statementId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TransactionId:
+      name: transactionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    From:
+      name: from
+      in: query
+      description: Début de la période (inclus).
+      schema:
+        type: string
+        format: date
+    To:
+      name: to
+      in: query
+      description: Fin de la période (incluse).
+      schema:
+        type: string
+        format: date
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+
+  responses:
+    BadRequest:
+      description: Requête invalide.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Authentification absente ou invalide.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Droits insuffisants sur la ressource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Ressource introuvable (ou non visible par l'utilisateur).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+  schemas:
+    UserCreate:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+          writeOnly: true
+        displayName:
+          type: string
+          maxLength: 100
+          description: Nom affiché aux autres utilisateurs (optionnel).
+
+    User:
+      type: object
+      required: [id, email, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          writeOnly: true
+
+    TokenResponse:
+      type: object
+      required: [accessToken, refreshToken, tokenType, expiresIn]
+      properties:
+        accessToken:
+          type: string
+          description: "JWT à envoyer dans l'en-tête `Authorization: Bearer`."
+        refreshToken:
+          type: string
+          description: Jeton à usage unique pour obtenir un nouveau jeton d'accès.
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresIn:
+          type: integer
+          description: Durée de validité du jeton d'accès, en secondes.
+          examples: [900]
+
+    Problem:
+      type: object
+      description: Erreur au format RFC 9457 (Problem Details).
+      required: [title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        errors:
+          type: array
+          description: Détail des erreurs de validation.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    Money:
+      type: string
+      description: Montant décimal sous forme de chaîne (évite les erreurs d'arrondi). Négatif pour une dépense.
+      pattern: '^-?\d+(\.\d{1,2})?$'
+      examples: ['-42.50', '1500.00']
+
+    Currency:
+      type: string
+      description: Code devise ISO 4217.
+      pattern: '^[A-Z]{3}$'
+      examples: [EUR]
+
+    AccessRole:
+      type: string
+      description: Niveau d'accès de l'utilisateur courant sur un compte.
+      enum: [OWNER, WRITE, READ]
+
+    AccountCreate:
+      type: object
+      required: [name, currency]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          examples: [Compte courant]
+        iban:
+          type: string
+          description: IBAN du compte (optionnel).
+        currency:
+          $ref: '#/components/schemas/Currency'
+
+    Account:
+      allOf:
+        - $ref: '#/components/schemas/AccountCreate'
+        - type: object
+          required: [id, ownerId, role, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+            ownerId:
+              type: string
+              format: uuid
+              readOnly: true
+            role:
+              $ref: '#/components/schemas/AccessRole'
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+
+    Statement:
+      type: object
+      required: [id, accountId, fileName, format, importedAt, transactionsImported]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        format:
+          type: string
+          enum: [csv, xlsx]
+        importedAt:
+          type: string
+          format: date-time
+        importedBy:
+          type: string
+          format: uuid
+          description: Utilisateur ayant importé le fichier.
+        periodStart:
+          type: string
+          format: date
+          description: Date de la plus ancienne transaction de l'extrait.
+        periodEnd:
+          type: string
+          format: date
+          description: Date de la plus récente transaction de l'extrait.
+        transactionsImported:
+          type: integer
+        duplicatesSkipped:
+          type: integer
+
+    StatementPage:
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Statement'
+
+    Transaction:
+      type: object
+      required: [id, accountId, date, amount, description]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        statementId:
+          type: string
+          format: uuid
+          description: Extrait dont la transaction est issue.
+        date:
+          type: string
+          format: date
+        amount:
+          $ref: '#/components/schemas/Money'
+        description:
+          type: string
+          description: Libellé de la transaction tel que fourni par la banque.
+        counterparty:
+          type: string
+          description: Contrepartie (bénéficiaire ou émetteur), si connue.
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/Category'
+            - type: 'null'
+
+    TransactionPage:
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Transaction'
+
+    CategoryCreate:
+      type: object
+      required: [label]
+      properties:
+        label:
+          type: string
+          maxLength: 100
+          examples: [Alimentation]
+
+    Category:
+      allOf:
+        - $ref: '#/components/schemas/CategoryCreate'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+
+    AccountSummary:
+      type: object
+      required: [accountId, from, to, currency, totalIncome, totalExpenses, net]
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        currency:
+          $ref: '#/components/schemas/Currency'
+        categoryId:
+          type: string
+          format: uuid
+          description: Présent si l'état est restreint à une catégorie.
+        totalIncome:
+          $ref: '#/components/schemas/Money'
+        totalExpenses:
+          $ref: '#/components/schemas/Money'
+          description: Total des dépenses (valeur négative).
+        net:
+          $ref: '#/components/schemas/Money'
+          description: Revenus + dépenses.
+        breakdown:
+          type: array
+          description: Détail ventilé selon `groupBy` (vide si `none`).
+          items:
+            type: object
+            required: [key, income, expenses]
+            properties:
+              key:
+                type: string
+                description: Identifiant de catégorie (`groupBy=category`) ou mois `YYYY-MM` (`groupBy=month`).
+              label:
+                type: string
+                description: Libellé de la catégorie, le cas échéant.
+              income:
+                $ref: '#/components/schemas/Money'
+              expenses:
+                $ref: '#/components/schemas/Money'
+
+    AccountAccessCreate:
+      type: object
+      required: [email, permission]
+      properties:
+        email:
+          type: string
+          format: email
+          description: Adresse de l'utilisateur à qui donner accès.
+        permission:
+          $ref: '#/components/schemas/Permission'
+
+    Permission:
+      type: string
+      enum: [READ, WRITE]
+
+    AccountAccess:
+      type: object
+      required: [userId, email, permission, grantedAt]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        permission:
+          $ref: '#/components/schemas/Permission'
+        grantedAt:
+          type: string
+          format: date-time
+
+    PageInfo:
+      type: object
+      required: [page, pageSize, totalItems]
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer

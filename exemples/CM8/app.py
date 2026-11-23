@@ -8,7 +8,7 @@ Lancer :
     pip install -r requirements.txt
     flask --app app run --debug
 """
-
+khjfkhfkjd
 from functools import wraps
 from uuid import UUID
 
